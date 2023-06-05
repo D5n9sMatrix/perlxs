@@ -1,0 +1,370 @@
+#!/usr/bin/perl
+#!-*- coding: utf-8 -*-
+
+=encoding UTF-8
+ 
+=head1 NAME
+ 
+XS::Check - Check XS for some common problems
+ 
+=head1 SYNOPSIS
+ 
+     
+    use FindBin '$Bin';
+    use XS::Check;
+    my $check = XS::Check->new ();
+    $check->check_file ("$Bin/synopsis.xs");
+ 
+ 
+produces output
+ 
+    /usr/home/ben/projects/xs-check/examples/synopsis.xs:3: x not a constant type.
+    /usr/home/ben/projects/xs-check/examples/synopsis.xs:3: len is not a STRLEN variable (unsigned int ).
+ 
+ 
+(This example is included as L<F<synopsis.pl>|https://fastapi.metacpan.org/source/BKB/XS-Check-0.13/examples/synopsis.pl> in the distribution.)
+ 
+ 
+=head1 VERSION
+ 
+This documents version 0.13 of XS-Check
+corresponding to L<git commit 74c31d3e805ada02c70f12d92dd4eba400ed6e09|https://github.com/benkasminbullock/xs-check/commit/74c31d3e805ada02c70f12d92dd4eba400ed6e09> released on Wed May 26 06:44:38 2021 +0900.
+ 
+=head1 DESCRIPTION
+ 
+This module offers ways to check XS files for some common flaws which
+we have tripped over.
+ 
+=head1 METHODS
+ 
+=head2 new
+ 
+    my $check = XS::Check->new ();
+ 
+Make a new XS::Check object. The checks are then run using L</check>
+or L</check_file>.
+ 
+=head3 Changing where the messages go
+ 
+The messages from L</check> or L</check_file> are usually printed
+using Perl's built-in warn function. If you need to have errors
+reported some other way, supply a code reference to C<new> with the
+key C<reporter> as follows:
+ 
+    my $usercheck = XS::Check->new (reporter => sub { print "help!" });
+ 
+The function you supply is then called back when L</check> or
+L</check_file> find something to remark on. The function is called
+with a hash containing the fields
+ 
+=over
+ 
+=item file
+ 
+the file name of the file where the error occurred, if using
+L</check_file> or if set with L</set_file>, otherwise the undefined
+value (C<undef>),
+ 
+=item line
+ 
+the line number where the error occurred, starting from 1,
+ 
+=item message
+ 
+the message from the module, a text string.
+ 
+=back
+ 
+The following example demonstrates a user-defined callback using the
+C<message> and C<line> fields:
+ 
+     
+    use XS::Check;
+    my $rchecker = XS::Check->new (reporter => \& reporter);
+    $rchecker->check ("Perl_croak ('croaking');\n");
+    sub reporter
+    {
+        my %rstuff = @_;
+        print "$rstuff{message} at $rstuff{line}.\n";
+    }
+     
+ 
+ 
+produces output
+ 
+    Remove the 'Perl_' prefix from Perl_croak at 1.
+ 
+ 
+(This example is included as L<F<reporter.pl>|https://fastapi.metacpan.org/source/BKB/XS-Check-0.13/examples/reporter.pl> in the distribution.)
+ 
+ 
+This was added in version 0.07 of the module..
+ 
+=head2 check
+ 
+    $check->check ($xs);
+ 
+See L</SUGGESTIONS> for what this reports.
+ 
+=head2 check_file
+ 
+    $check->check ($xs_file);
+ 
+Convenience method to read in C<$xs_file> then run L</check> on it.
+ 
+This assumes UTF-8 encoding of C<$xs_file>.
+ 
+=head2 set_file
+ 
+    $check->set_file ($file);
+ 
+Set the file name for error reporting. Use any false value to clear
+it. For example:
+ 
+     
+    use XS::Check;
+    my $check = XS::Check->new ();
+    my $xs = "Perl_croak (\"frog\")\n";
+    $check->check ($xs);
+    $check->set_file ('Yabadabado');
+    $check->check ($xs);
+    $check->set_file ('');
+    $check->check ($xs);
+ 
+ 
+produces output
+ 
+    1: Remove the 'Perl_' prefix from Perl_croak.
+    Yabadabado:1: Remove the 'Perl_' prefix from Perl_croak.
+    1: Remove the 'Perl_' prefix from Perl_croak.
+ 
+ 
+(This example is included as L<F<set-file.pl>|https://fastapi.metacpan.org/source/BKB/XS-Check-0.13/examples/set-file.pl> in the distribution.)
+ 
+ 
+This was added in version 0.08 of the module.
+ 
+=head1 SUGGESTIONS
+ 
+This section details the possible suggestions made by the module and
+the motivations behind them.
+ 
+=head2 Use STRLEN in SvPV
+ 
+Using an C<int> type for the second argument to L<C<SvPV>|https://perldoc.perl.org/perlapi#SvPV> may
+cause errors on 64-bit Perls, because within the macro the address of
+the variable is taken, and then it is sent to a Perl function, and if
+the length doesn't match the length of Perl's C<STRLEN> an error may
+occur.
+ 
+=head2 Use const char * for return value of SvPV
+ 
+The pointer returned by L<C<SvPV>|https://perldoc.perl.org/perlapi#SvPV> is the actual Perl buffer,
+not a copy, so unless one actually wants to write into it, it's better
+to use C<const char *> to make sure one does not overwrite it.
+ 
+=head2 malloc/calloc/realloc/free
+ 
+The C standard library functions C<malloc>, C<calloc>, C<realloc>, and
+C<free> should usually be replaced with L<C<Newx>|https://perldoc.perl.org/perlapi#Newx>, L<C<Newxz>|https://perldoc.perl.org/perlapi#Newxz>, L<C<Renew>|https://perldoc.perl.org/perlapi#Renew>, and L<C<Safefree>|https://perldoc.perl.org/perlapi#Safefree>
+respectively in Perl XS code, because the C standard library functions
+may cause "free to wrong pool" errors on multithreaded Windows Perls.
+ 
+=head2 Perl_ prefix
+ 
+Functions of the form C<Perl_croak> should usually not be used, just
+L<C<croak>|https://perldoc.perl.org/perlapi#croak>. The C<Perl_> prefix functions are the actual
+functions and C<croak> and other such functions are actually macros,
+but these macros contain hidden arguments. (The hidden arguments are
+the C<pTHX_> and similar things seen in the Perl source code.)
+ 
+This was added in version 0.04 of the module.
+ 
+=head2 Don't use (void) in arguments
+ 
+XS functions cannot use the ANSI C C<(void)> to indicate that they do
+not take any arguments, instead this results in a variable called
+"void" being created.
+ 
+This was added in version 0.06 of the module.
+ 
+=head2 Dereferencing av_fetch or hv_fetch
+ 
+One should not dereference the return value of L<C<av_fetch>|https://perldoc.perl.org/perlapi#av_fetch>
+or L<C<hv_fetch>|https://perldoc.perl.org/perlapi#hv_fetch> without checking for C<NULL> (zero pointer)
+since it is possible to get C<NULL>, for example if an array is
+created with only a tenth element.
+ 
+For an extended discussion, see L<http://blogs.perl.org/users/ben_bullock/2020/02/av-fetch-can-return-null.html>.
+ 
+This check does not actually check that the returned value is checked
+for non-nullness before being dereferenced, only that there is nothing
+of the form C<* av_fetch> in your code.
+ 
+This was added in version 0.09 of the module.
+ 
+=head2 Put whitespace before hash comments
+ 
+The XS manual suggests putting whitespace before # comments to
+distinguish them from preprocessor statements.
+ 
+See L<https://perldoc.perl.org/perlxs#Inserting-POD,-Comments-and-C-Preprocessor-Directives>. 
+ 
+=over
+ 
+Comments can be added to XSUBs by placing a # as the first
+non-whitespace of a line. Care should be taken to avoid making the
+comment look like a C preprocessor directive, lest it be interpreted
+as such. The simplest way to prevent this is to put whitespace in
+front of the #.
+ 
+=back
+ 
+This was added in version 0.09 of the module..
+ 
+=head2 Add one to av_len
+ 
+The L<C<av_len>|https://perldoc.perl.org/perlapi#av_len> function is something of a booby trap in that
+it returns the length of an C<AV *> minus one, so if it is used as-is,
+one element of the array will be missed. The module does a simplistic
+check of seeing whether you have added one to C<av_len>.
+ 
+This was added in version 0.10 of the module.
+ 
+=head2 Use SvPVbyte or SvPVutf8 rather than SvPV
+ 
+To work around Perl's strings sometimes being in an ambiguous state,
+it is better to specify either SvPVbyte or SvPVutf8 and friends rather
+than plain SvPV. This check is also applied to the similar functions
+like SvPV_nolen.
+ 
+The reasons for this are documented in C<perldoc perlapi> for Perl
+versions from C<5.34> onwards.
+ 
+This was added in version 0.12 of the module.
+ 
+=head1 LIMITATIONS
+ 
+As of 0.13, the module has the following limitations.
+ 
+=over
+ 
+=item Struct members
+ 
+The module is not very good at parsing struct members, so XS code like
+the following doesn't get dealt with properly:
+ 
+    s.txt = SvPV (sv, s.len);
+ 
+=item UTF-8 only
+ 
+L</check_file> uses L<File::Slurper/read_text> to read the text, which
+means it only accepts text encoded as UTF-8.
+ 
+=item Variable declarations rely on a simplistic hack
+ 
+The current method of parsing variable declarations uses a very
+simplistic hack, and it is likely to produce false results if a
+variable name is used twice for two different things in the same file.
+ 
+=item Variables declared within function definitions are not parsed
+ 
+The following variable C<length> is not dealt with correctly:
+ 
+    static void
+    sv_to_text_fuzzy (SV * text, STRLEN length)
+    {
+        const unsigned char * stuff;
+        /* Copy the string in "text" into "text_fuzzy". */
+        stuff = (unsigned char *) SvPV (text, length);
+ 
+=back
+ 
+=head1 DEPENDENCIES
+ 
+=over
+ 
+=item L<C::Tokenize>
+ 
+This supplies the regular expressions used to parse C by the module.
+ 
+=item L<File::Slurper/read_text>
+ 
+This is used by L</check_file>.
+ 
+=item L<Text::LineNumber>
+ 
+This is used to get the line numbers.
+ 
+=item L<Carp>
+ 
+=back
+ 
+=head1 COMMAND-LINE TOOL
+ 
+A command line tool called C<checkxs> is installed with the module. It
+runs the L</check_file> method on each file named on the command line.
+ 
+    checkxs Some.xs
+ 
+There are two options:
+ 
+=over
+ 
+=item --verbose
+ 
+Switch on verbose debugging output
+ 
+=item --version
+ 
+Print the version of XS::Check in use.
+ 
+=back
+ 
+=head1 SEE ALSO
+ 
+=head2 Other CPAN modules
+ 
+=over
+ 
+=item ExtUtils::ParseXS
+ 
+L<ExtUtils::ParseXS> is Perl's parser for XS which converts XS code
+into C.
+ 
+=item Test::XS::Check
+ 
+L<Test::XS::Check> is a test module based on this one.
+ 
+=item XS::Tutorial
+ 
+L<XS::Tutorial> is a tutorial about programming in XS.
+ 
+=back
+ 
+=head2 More information
+ 
+=over
+ 
+=item L<Perl XS modules and CPAN testers|https://www.lemoda.net/perl/perl-xs-cpan-testers/index.html>
+ 
+A collection of more or less obscure bugs found by CPAN testers, the
+original inspiration for this module.
+ 
+=back
+ 
+ 
+ 
+=head1 AUTHOR
+ 
+Ben Bullock, <bkb@cpan.org>
+ 
+=head1 COPYRIGHT & LICENCE
+ 
+This package and associated files are copyright (C) 
+2017-2021
+Ben Bullock.
+ 
+You can use, copy, modify and redistribute this package and associated
+files under the Perl Artistic Licence or the GNU General Public
+Licence.

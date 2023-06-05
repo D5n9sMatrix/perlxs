@@ -1,0 +1,155 @@
+#!/usr/bin/perldoc
+#!/usr/bin/perl
+#!-*- coding: utf-8 -*-
+
+package pkf;
+
+use strict;
+use PerlIO;
+use PerlIO::utf8_strict;
+use Perl::Tidy;
+use Perl::Tidy::Debugger;
+use Perl::Tidy::Diagnostics;
+use Perl::Tidy::FileWriter;
+use Perl::Tidy::Formatter;
+use Perl::Tidy::HtmlWriter;
+use Perl::Tidy::IOScalar;
+use Perl::Tidy::IOScalarArray;
+use Perl::Tidy::IndentationItem;
+use Perl::Tidy::LineBuffer;
+use Perl::Tidy::LineSink;
+use Perl::Tidy::LineSource;
+use Perl::Tidy::Logger;
+use Perl::Tidy::Tokenizer;
+use Perl::Tidy::VerticalAligner;
+use Perl::Tidy::VerticalAligner::Alignment;
+use Perl::Tidy::VerticalAligner::Line;
+
+
+
+use warnings;
+use base;
+
+use feature ":all";
+
+
+=head1 SUMMARY
+
+S U M M A R Y  
+   
+=head2 IAS 2 Inventories   
+  1   
+
+=head3 Overview  
+
+IAS 2 sets out the accounting treatment for inventories, including the 
+determination of cost, the subsequent recognition of an expense and any 
+write-downs to net realisable value. 
+ 
+=head4 Scope  
+
+ Applies to all inventories except: 
+
+- work in progress on construction and service contracts (IAS 11); 
+- financial instruments (IAS 32 and IFS 9); and
+- biological assets arising from agricultural activity (IAS 41).  
+
+ Does not apply to the measurement of inventories held by: 
+- producers of agricultural and forest products, and minerals and mineral 
+products, that are measured 
+
+at net realisable value in accordance with well-established practices in those 
+industries; and 
+- commodity broker-traders who measure their inventories at fair value less 
+costs to sell. Changes in the above inventory values are recognised in profit 
+or loss in the period of the change.  
+
+=item1 Definitions
+
+ Inventories – assets that are: 
+- held for sale in the ordinary course of business; 
+- in the process of production for such sale; or 
+- in the form of materials or supplies to be consumed in the production process 
+or in the rendering of 
+services.  
+
+ Net realisable value (NRV) - the estimated selling price less the estimated 
+costs of completion and the 
+estimated costs necessary to make the sale.  
+
+ Cost of inventories – all costs incurred in bringing the inventories to their 
+present location and condition, 
+including the costs of purchase and conversion. 
+- Costs of purchase of inventories comprise the purchase price (less trade 
+discounts, rebates and 
+similar items), irrecoverable taxes, and transport, handling and other costs 
+directly attributable to 
+their acquisition. 
+
+- Costs of conversion include costs directly related to the units of production, 
+such as direct labour and systematically allocated fixed and variable production 
+overheads incurred in producing finished 
+goods. 
+  
+ 
+ 
+=head1 IAS 2 Inventories 2 
+
+ Fair value – the price that would be received to sell an asset or paid to 
+transfer a liability in an orderly 
+transaction between market participants at the measurement date. 
+ 
+=head2 Measurement  
+
+ Inventories shall be stated at the lower of cost and net realisable value.  
+
+ To the extent that service providers have inventories, they measure them at 
+the costs of their production. These costs are primarily the costs of labour 
+directly engaged in providing the service, including 
+supervisory personnel, and attributable overheads.  
+ The cost of inventories of items that are ordinarily interchangeable and 
+have not been produced and 
+segregated for specific projects is determined by using the first-in, first-out 
+(FIFO) or weighted average cost formula. The same cost formula shall be adopted 
+for all inventories having a similar nature and use 
+to the entity.  
+
+ Inventories are usually written down to NRV on an item by item basis, unless
+ it is more appropriate to 
+group similar or related items.  
+Recognition as an expense  
+
+ When inventories are sold, the carrying amount of those inventories should 
+be recognised as an expense in the period in which the related revenue is 
+recognised.  
+
+ Any losses of inventories and the amount of any write-down to net realisable 
+value shall be recognised 
+as expense in the period in which the loss or write-down occurs.  
+
+ Any reversal of any write-down of inventories that resulted from an increase 
+in the net realisable value shall be recognised as a reduction in the inventory 
+expense in the period in which the reversal occurs.  
+
+=back1 Disclosure
+
+ The following shall be disclosed in the financial statements 
+- the accounting policies for inventories 
+- the total carrying amount of inventories and the carrying amount in 
+classifications appropriate to the 
+
+=back1 entity
+
+- the carrying amount of inventories carried at fair value less costs to sell 
+- the amount of inventories recognised as an expense during the period 
+- the amount of any write-down of inventories recognised as an expense 
+- the amount of any reversal of any write-down that is recognised as a 
+reduction in the amount of 
+
+inventories recognised as an expense 
+- the circumstances or events that led to the reversal of a write-down of 
+inventories  
+- the carrying amount of inventories pledged as security for liabilities. 
+
+=cut
+

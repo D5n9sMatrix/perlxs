@@ -1,0 +1,27 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="p5m" type="#PerlConfigurationType" factoryName="Perl" editBeforeRun="true" singleton="false" show_console_on_std_err="false" show_console_on_std_out="false">
+    <option name="allowRunningInParallel" value="true" />
+    <option name="alternativeSdkName" />
+    <option name="compileTimeBreakpointsEnabled" value="false" />
+    <option name="consoleCharset" value="UTF-8" />
+    <option name="envs">
+      <map />
+    </option>
+    <option name="initCode" value="" />
+    <option name="nonInteractiveModeEnabled" value="false" />
+    <option name="passParentEnvs" value="true" />
+    <option name="perlParameters" value="" />
+    <option name="programParameters" value="" />
+    <option name="scriptCharset" value="utf8" />
+    <option name="scriptPath" value="$PROJECT_DIR$/matrix/bin/p5m.pl" />
+    <option name="selectedOptions">
+      <list />
+    </option>
+    <option name="startMode" value="RUN" />
+    <option name="useAlternativeSdk" value="false" />
+    <option name="workingDirectory" value="$PROJECT_DIR$" />
+    <method v="2">
+      <option name="ToolBeforeRunTask" enabled="true" actionId="Tool_External Tools_p5m" />
+    </method>
+  </configuration>
+</component>
